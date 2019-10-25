@@ -1,0 +1,77 @@
+	#公用Make规则配置
+		#设置编译器类型
+
+		CXX := g++
+
+		CC := gcc
+		
+		CFLAGS := -g
+
+		#设置编译.d文件相关内容
+
+		DEPFLAGS := -MM
+
+		
+
+		#设置所有静态库文件所在位置，会根据每个Makefile文件的top_srcdir设置相对位置
+
+		LIBDIR := $(top_srcdir)/lib
+
+		DEPSD := dep
+	
+		#设置编译程序时需要在哪些目录查找静态库文件
+
+		LDFLAGS := -L .\
+								-L $(top_srcdir)/lib
+
+		#设置VPATH，在检查依赖关系时，如果查找-lxxxx时，在哪些目录查找静态库文件
+
+		VPATH := $(LIBDIR)
+
+
+		#设置编译程序时查找头文件的目录位置
+
+		INCLUDEDIR := -I .\
+								-I $(top_srcdir)/inc\
+
+		
+		#声明要生成的目标文件，具体规则在具体的Makefile中定义
+$(TARGET): 
+
+
+		
+#生成.o文件所依赖的.cpp和.c文件	
+obj/%.o: %.c
+		@if [ ! -d "obj" ]; then mkdir -p "obj"; fi;	
+		$(CC) $(CFLAGS) -c -o $@ $(INCLUDEDIR) $<
+	
+
+
+
+
+#生成.d文件,存放.c文件的所有依赖规则
+$DEPSD/%.d: %.c
+		@if [ ! -d $DEPSD ]; then mkdir -p $DEPSD; fi;
+		set -e; rm -f $@;
+		
+		$(CXX) $(CFLAGS) $(DEPFLAGS) $(INCLUDEDIR) $< > $@.$$$$; \
+		
+		sed 's,\($*\)\.o[ :]*,$DEPSD/\1.o $@ : ,g' < $@.$$$$ > $@; \
+		rm -f $@.$$$$
+		
+-include $(DEPS)
+
+#检测是否有文件被修改，只要有就全部编译
+
+all: $(SRCS) $(TARGET)
+
+
+#清除编译文件
+
+.PHONY:clean
+clean:
+
+	-rm -f $(TARGET)
+	-rm -f obj/*.o
+	-rm -f dep/*.d
+	-rm -f core
