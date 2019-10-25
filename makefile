@@ -16,7 +16,7 @@
 		C_FILES = $(shell ls *.c)
 		
 
-#		SRCS = $(CPP_FILES) $(C_FILES)
+		#SRCS = $(CPP_FILES) $(C_FILES)
 		SRCS = $(C_FILES)
 		
 		BASE = $(basename $(SRCS))
