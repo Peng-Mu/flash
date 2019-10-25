@@ -38,8 +38,7 @@
 	
 
 		#所有要包含的静态库的名称
-
-#		LIBS := -lfa_common
+		#LIBS := -lfa_common
 
 	
 		#设置目标程序依赖的.o文件
