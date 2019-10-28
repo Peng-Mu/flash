@@ -57,11 +57,13 @@ int main(int argc, const char* argv[])
 	
 	for( i= 0 ; i < 4; i++)
 	{
+        num = strlen(p[i]);
 		flashrecord->ftable = flashtable;
 		flashrecord->id = i;
-		flashrecord->width = strlen(p[i]);
-		flashrecord->prefix = malloc(sizeof(sizeof(p[i])));
-		memcpy(flashrecord->prefix,p[i],strlen(p[i]));
+		flashrecord->width = num;
+		flashrecord->prefix = malloc(num);
+		memcpy(flashrecord->prefix,p[i],num);
+        flashrecord->prefix[num]='\0';
 		//printf("rules: %s \n",  flashrecord->prefix );
 		rc = FlashTable_Record_Add(flashtable, flashrecord, i);
 		if( rc != 0)
