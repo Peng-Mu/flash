@@ -5,7 +5,7 @@
 
 		CC := gcc
 		
-		CFLAGS := -g
+		override CFLAGS += -g
 
 		#设置编译.d文件相关内容
 

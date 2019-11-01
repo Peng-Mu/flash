@@ -1,129 +1,97 @@
-#include <stdio.h>
+/*****MARVELL STARGATE NSE********************************************************************/
+/*****Application Example: stargate0 *********************************************************
+Add one table
+Add one record before initial allocation
+Start allocation
+Search on this record
+Add one record during runtime
+allocation during runtime
+search on this record
+**********************************************************************************************/
+
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
-#include <math.h>
-#include "interface.h"
+//#include "nse.h"
+//#include "npu_platform.h"
+#include "pc_trie.h"
+
+#define LOG_NAME "nseApp0.log"
+
+void str2binary(char* str, int width);
+void binary2str(char* in, char* out, int width);
+void displayResults(int* readys, int* matchs, int* priorities);
 
 int main(int argc, const char* argv[])
 {
-	
-	sFlashtable *flashtable = NULL;
-	sFlashrecord *flashrecord = NULL;
-	sLpResult *lpresult = (sLpResult *)malloc(sizeof(lpresult));
-	lpresult->level = 0 ;
-	lpresult->match = 0;
-	//sFlashrecord *flash = NULL;
-	int rc = 0;
-	int num, last, id, i;
-	char *search;
-	char *p[] = {
-		"0",
-		"00",
-		"000",
-		"1111111111111",
-		NULL
-	};
-	
-//	int i, j = 1;
-//	for(i = 0; i < 14; i++)
-//	{
-//		while ((j >= pow(2,i)) && (j < pow(2,i+1)))
-//		{
-//			printf("%d(%d) ", j, root[j].id);
-//			j++;
-//		}
-//		printf("\n");
-//	}
-	
-	rc = FlashTable_Create(&flashtable);
-	if(rc != 0)
-	{
-		printf("create flashtable failure");
-		goto done;
-	}
-	flashtable->depth = 2*1024*1024;
-	flashtable->id 	  = 0;
-	flashtable->name  = "T1";
-	flashtable->recordCount = 0;
-	flashtable->width = 144;
-	
-	rc = FlashRecord_Create(&flashrecord);
-	if( rc != 0)
-	{
-		printf("create flashrecord failure");
-		goto done;
-	}
-	
-	
-	for( i= 0 ; i < 4; i++)
-	{
-		flashrecord->ftable = flashtable;
-		flashrecord->id = i;
-		flashrecord->width = strlen(p[i]);
-		flashrecord->prefix = malloc(sizeof(sizeof(p[i])));
-		memcpy(flashrecord->prefix,p[i],strlen(p[i]));
-		//printf("rules: %s \n",  flashrecord->prefix );
-		rc = FlashTable_Record_Add(flashtable, flashrecord, i);
-		if( rc != 0)
-		{
-			printf("add flashrecord failure");
-			goto done;
-		}
-		
-	}
-	
-	
-	memset(flashrecord, 0, sizeof(*flashrecord));
-	for( i = 0 ;  i < 4; i++ )
-	{
-		flashrecord = FlashTable_Record_Get(flashtable, i);
-		if(flashrecord == NULL)
-		{
-			printf("get flashrecord failure");
-			goto done;
-		}
-		printf("%d th rules: %s \n", i, flashrecord->prefix );
-		rc = Dp_Lookup(flashtable, flashrecord->width, flashrecord->prefix, lpresult);
-		if(rc!=0)
-		{
-			printf("search failure");
-			goto done;	
-		}
-		printf("match : %d , level: %d \n", lpresult->match,lpresult->level);
-	}
-	
-
-	for( i = 0 ;  i < 4; i++ )
-	{
-		flashrecord = FlashTable_Record_Get(flashtable, i);
-		if(flashrecord == NULL)
-		{
-			printf("get flashrecord failure");
-			goto done;
-		}
-		search= flashrecord->prefix ;
-		//printf("rules: %s \n",  search );
-		rc = FlashTable_Record_Rm(flashtable, i);
-		if(flashrecord == NULL)
-		{
-			printf("rm flashrecord failure");
-			goto done;
-		}
-		rc = Dp_Lookup(flashtable, flashrecord->width, search, lpresult);
-		if(rc!=0)
-		{
-			printf("search failure");
-			goto done;	
-		}
-		printf("match : %d , level: %d \n", lpresult->match,lpresult->level);
-	}
-
-	free(lpresult);
-	
-	
-done:
-	if (flashrecord) FlashRecord_Destory(flashrecord);
-	if (flashtable) FlashTable_Destory(flashtable);
-    
-	return rc;
+	NHIModuleSet* LpmModuleSet = NULL;
+	NHITableEntry* rootEntryIndex = NULL;
+	InitLpmModuleSet(&LpmModuleSet);
+	pc_Trie *pcTrie = NULL;
+	int rootId = 999;
+	CreatePcTrie(&pcTrie, LpmModuleSet, rootId, -1, NULL);
+	pc_TrieNode *pcTrieNode = malloc(sizeof(pc_TrieNode));
+	pcTrieNode->lpmRecordId = 0;
+	pcTrieNode->lenth = 2;
+	memset(pcTrieNode->recordData, 0, sizeof(pcTrieNode->recordData));
+	pcTrieNode->recordData[0] = 0x02;//10100
+	InsertPcTrieNode(pcTrie, pcTrieNode);
+	pcTrieNode->lpmRecordId = 1;
+	pcTrieNode->lenth = 5;
+	memset(pcTrieNode->recordData, 0, sizeof(pcTrieNode->recordData));
+	pcTrieNode->recordData[0] = 0x14;//10100
+	InsertPcTrieNode(pcTrie, pcTrieNode);
+	pcTrieNode->lpmRecordId = 2;
+	pcTrieNode->lenth = 2;
+	memset(pcTrieNode->recordData, 0, sizeof(pcTrieNode->recordData));
+	pcTrieNode->recordData[0] = 0x01;//10100
+	InsertPcTrieNode(pcTrie, pcTrieNode);
+	return 0;
 }
+
+
+void str2binary(char* str, int width)
+{
+    int i, j;
+    for (i=0; i<width/8; i++)
+    {
+        char byte = 0;
+        for (j=0; j<8; j++)
+        {
+            int idx = 8*i + j;
+            char value = (idx < width) 
+                            ? str[idx] - '0' 
+                            : 0;
+            byte = byte<<1 | value;
+        }
+        str[i] = byte;
+    }
+    str[i] = '\0';
+}
+
+void binary2str(char* in, char* out, int width)
+{
+    int i, j;
+    char buff[1024] = "";
+    memcpy(buff, in, width);
+    for (i=0; i<width; i++)
+    {
+        for (j=7; j>=0; j--)
+        {
+            out[8*i+j] = '0' + ((int)buff[i]&0x01);
+            buff[i] = buff[i]>>1;
+        }
+        out[width*8] = 0;
+    }
+}
+
+void displayResults(int* readys, int* matchs, int* priorities)
+{
+    int i;
+    printf("Channle    Ready    Match     Priority\n");
+    for (i=0; i<4; i++)
+    {
+        printf("%7d    %5d    %5d     %d\n", i, readys[i], matchs[i], priorities[i]);
+    }
+}
+
