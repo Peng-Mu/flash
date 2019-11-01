@@ -9,15 +9,22 @@
 #define PC_MOUDLE_SIZE 128
 #define PC_MOUDLE_COUNT (PC_TOTAL_SIZE/PC_MOUDLE_SIZE)
 
-struct bitMap;
-struct NHITableSet;
+struct BitMap;
+struct NHIModuleSet;
 struct NHITableEntry;
+struct sPairList;
+
+typedef struct sPairList {
+	struct sPairList* next;
+	int first;
+	int second;
+}PairNode;
 
 typedef struct sNHITableEntry {
 	unsigned char available;
 	int lpmRecordId[1 << COMPRESS_LYAER_NUMBER];
 	unsigned char individualMark[((1 << COMPRESS_LYAER_NUMBER) + 7) / 8];
-	int parentId[COMPRESS_LYAER_NUMBER];
+	int parentId[1<<COMPRESS_LYAER_NUMBER];
 	void *AD[1 << COMPRESS_LYAER_NUMBER];
 }NHITableEntry;
 
@@ -35,12 +42,16 @@ typedef struct sRootInfo {
 	NHITableEntry* rootEntryIndex;
 }rootInfo;
 
-typedef struct bitMap {
+typedef struct BitMap {
 	rootInfo root;
 	NHITableEntry* NHITable;
 	NHITableEntry* Index[1 << (PC_TRIE_BITS - COMPRESS_LYAER_NUMBER+1)];
 	int FirstAvailableLocation;
 	int moduleId;
+	PairNode* relationList;
+	PairNode* lastRelationListNode;
+	int relationListSize;
+	PairNode* firstNodeLenthList;
 }pc_Trie;
 
 typedef struct sPc_TrieNode {
@@ -55,6 +66,30 @@ TcError AllocatNHITable(NHIModuleSet* lpmModuleSet, NHITableEntry **NHITableInde
 TcError GetNHITableLocation(pc_Trie *pcTrie, NHITableEntry **NHITableIndex);
 TcError DeletePcTrieNode(pc_Trie *pcTrie, int index);
 TcError UpdatePcTrieChildNode(pc_Trie *pcTrie, int index);
+void RecoveryData(pc_Trie *pcTrie, int index, int **recordId);
 int IsChildFull(pc_Trie *pcTrie, int index);
 TcError InitLpmModuleSet(NHIModuleSet** lpmModuleSet);
+int IsPairListEmpty(PairNode* pairList) {
+	if (pairList->next) { return 0; }
+	else { return 1; }
+}
+TcError addPairListNode(PairNode** lastRelationListNode, int first, int second) {
+	PairNode* newNode = malloc(sizeof(PairNode));
+	newNode->next = NULL;
+	newNode->first = first;
+	newNode->second = second;
+	(*lastRelationListNode)->next = newNode;
+	*lastRelationListNode = newNode;
+	return TcE_OK;
+}
+PairNode* findSecondOfPairList(PairNode* pairList, int first) {
+	PairNode* pairListNode = pairList->next;
+	while (pairListNode) {
+		if (pairListNode->first == first) {
+			return pairListNode;
+		}
+		pairListNode = pairListNode->next;
+	}
+	return NULL;
+}
 #endif

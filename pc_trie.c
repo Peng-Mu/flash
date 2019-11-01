@@ -1,6 +1,6 @@
 #include "pc_trie.h"
 #include "utils.h"
-#include "LList.h"
+//#include "LList.h"
 
 TcError CreatePcTrie(pc_Trie **pcTrie, NHIModuleSet* lpmModuleSet, int rootId, int rootModuleId, NHITableEntry* rootEntryIndex)
 {
@@ -108,7 +108,7 @@ TcError InsertPcTrieNode(pc_Trie *pcTrie, pc_TrieNode *pcTrieNode)
 		}
 	}
 	//update children
-	UpdatePcTrieChildNode(pcTrie, index);
+	UpdateChild(pcTrie, index);
 done:
 	return rc;
 }
@@ -227,3 +227,85 @@ TcError InitLpmModuleSet(NHIModuleSet** LpmModuleSet) {
 	*LpmModuleSet = ptr;
 	return TcE_OK;
 }
+
+
+
+TcError UpdateChild(pc_Trie* pcTrie, int index , int now , int src,  int location)
+{
+		int size, i, j,n1, n2,p1,p2, k, offset, temp;
+		char flag ;
+		TcError rc = 0 ;
+		NHITableEntry* nhi;
+		PairNode* pN;
+		size = 1 << (PC_TRIE_BITS - COMPRESS_LYAER_NUMBER + 1);
+		temp = index ;
+		
+		i = 2 * temp;
+		if(i < size )
+		{
+			if( 2 * location < 1 << COMPRESS_LYAER_NUMBER )
+			{
+				nhi = pcTrie->Index[i];
+				offset = 2*location  ;
+			}else if ( 2 * location >= 1 << COMPRESS_LYAER_NUMBER && 2*location < 1 << (COMPRESS_LYAER_NUMBER+1))
+			{
+				if( i + 1 < size)
+				{
+					nhi = pcTrie->Index[i+1];
+					offset = 2*location - 1 << COMPRESS_LYAER_NUMBER ;
+				}
+			}
+			if( nhi == NULL)
+			{
+					for( j = 0 ; j < 2; j++)
+				 {
+				 	offset = offset + j ;
+					UpdateChild(pcTrie, i , now , src, offset);
+				 }	
+			}else
+			{
+				  
+				  for(k = 0 ; k < 2  ; k++)
+				 {
+				 	offset = offset + k;
+					n1 = nhi->lpmRecordId[offset];
+					p1 = nhi->parentId[offset];
+					BitBufferGetBit(nhi->individualMark, sizeof(nhi->individualMark), offset, &flag);
+					if(flag == 0)
+					{	
+						if(n1 == src)
+						{
+							nhi->lpmRecordId[offset] = now;
+							nhi->parentId[offset] = src ;
+							UpdateChild(pcTrie, i , now , src, offset);
+						}
+							
+					}
+					else
+					{
+						if( p1 == src )
+						{
+							nhi->parentId[offset] = now;
+							pN = findSecondOfPairList(pcTrie->relationList,n1);
+							if( pN == NULL || pN->second != src)
+							{
+								printf("error, nhi dnot macth parentlist\n ");
+								rc = 1;
+								goto done;
+							}
+							pN->second = now;
+							UpdateChild(pcTrie, i , now , src, offset);
+						}
+					}
+				  }	
+					
+			}
+			
+		}
+
+
+		
+done:
+	return rc;
+}
+
