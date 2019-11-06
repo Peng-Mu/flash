@@ -1,0 +1,70 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+Bitmap_Create	pc_trie.c	/^char* Bitmap_Create(int prefix_len)$/;"	f
+Bitmap_Destroy	pc_trie.c	/^void Bitmap_Destroy(char *bitmap)$/;"	f
+Count_One	pc_trie.c	/^int Count_One(char *bitmap, int start, int end)$/;"	f
+Display_All	test1.c	/^void Display_All(char *bitmap, t_PcSlot **slot_head, t_PcNode *node_head)$/;"	f
+FlashError	inc/ftrie.h	/^typedef int  FlashError;$/;"	t
+Hash	wholetrie.c	/^t_PcTrie* Hash(char *data_13, t_PcTrie *trie_ptr)$/;"	f
+INC	makefile	/^INC = .\/inc $/;"	m
+Left_Child	pc_trie.c	/^t_PcNode* Left_Child(char *bitmap, t_PcSlot **slot_head, t_PcNode *node_head, int num, int pre_one_cnt, int *curr_one_cnt)$/;"	f
+OBJS	makefile	/^OBJS = wholetrie_test.o ftrie.o pc_trie.o wholetrie.o mymath.o$/;"	m
+PcNode_Create	pc_trie.c	/^t_PcNode* PcNode_Create(int num)$/;"	f
+PcNode_Destroy	pc_trie.c	/^void PcNode_Destroy(t_PcNode *node_head)$/;"	f
+PcNode_Locate	pc_trie.c	/^t_PcNode* PcNode_Locate(char *bitmap, t_PcSlot **slot_head, t_PcNode *node_head, int num)$/;"	f
+PcTrie_Add_Update	pc_trie.c	/^void PcTrie_Add_Update(char *data, int id, int length, char *bitmap, t_PcSlot **slot_head, t_PcNode *node_head)$/;"	f
+PcTrie_Pfx_Add	pc_trie.c	/^void PcTrie_Pfx_Add(int num, int id, int length, char *bitmap, t_PcSlot **slot_head, t_PcNode *node_head)$/;"	f
+PcTrie_Pfx_Delete	pc_trie.c	/^void PcTrie_Pfx_Delete(int num, char *bitmap, t_PcSlot **slot_head, t_PcNode *node_head)$/;"	f
+PcTrie_Pfx_Deliver	pc_trie.c	/^void PcTrie_Pfx_Deliver(int num, int id, int length, int one_cnt, char *bitmap, t_PcSlot **slot_head, t_PcNode *node_head)$/;"	f
+PcTrie_Pfx_Inherit	pc_trie.c	/^void PcTrie_Pfx_Inherit(int num, char *bitmap, t_PcSlot **slot_head, t_PcNode *node_head)$/;"	f
+PcTrie_Pfx_Num	pc_trie.c	/^int PcTrie_Pfx_Num(char *data)$/;"	f
+PcTrie_Pfx_Search	pc_trie.c	/^int PcTrie_Pfx_Search(char *data, char *bitmap, t_PcSlot **slot_head, t_PcNode *node_head)$/;"	f
+Right_Child	pc_trie.c	/^t_PcNode* Right_Child(char *bitmap, t_PcSlot **slot_head, t_PcNode *node_head, int num, int pre_one_cnt, int *curr_one_cnt)$/;"	f
+Slot_Add	pc_trie.c	/^t_PcSlot* Slot_Add(t_PcSlot **slot_head, int slot_num)$/;"	f
+Slot_Create	pc_trie.c	/^t_PcSlot** Slot_Create(void)$/;"	f
+Slot_Delete	pc_trie.c	/^void Slot_Delete(t_PcSlot **slot_head, int slot_num)$/;"	f
+Slot_Destroy	pc_trie.c	/^void Slot_Destroy(t_PcSlot **slot_head)$/;"	f
+Slot_Locate	pc_trie.c	/^t_PcSlot* Slot_Locate(t_PcSlot **slot_head, int slot_num)$/;"	f
+TARGET	makefile	/^TARGET = aaa$/;"	m
+Trie_Create	ftrie.c	/^FlashError Trie_Create(t_TrieNode** trienode, int prefix_len)$/;"	f
+Trie_Destroy	ftrie.c	/^void Trie_Destroy(t_TrieNode *pNode)$/;"	f
+Trie_Prefix_Add	ftrie.c	/^FlashError Trie_Prefix_Add(t_TrieNode *node, char *data_13, int id)$/;"	f
+Trie_Prefix_Delete	ftrie.c	/^FlashError Trie_Prefix_Delete(t_TrieNode *node, char *data_13)$/;"	f
+Trie_Prefix_Locate	ftrie.c	/^FlashError Trie_Prefix_Locate(t_TrieNode *node, char *data_13, int* last_num, int* locate)$/;"	f
+Trie_Prefix_Search	ftrie.c	/^FlashError Trie_Prefix_Search(t_TrieNode *node, const char *prefix_data, int * locate)$/;"	f
+WholeTrie_Create	wholetrie.c	/^void WholeTrie_Create(t_TrieNode **node, t_PcTrie **trie_ptr)$/;"	f
+WholeTrie_Destroy	wholetrie.c	/^void WholeTrie_Destroy(t_TrieNode *node, t_PcTrie *trie_ptr)$/;"	f
+WholeTrie_Pfx_Add	wholetrie.c	/^void WholeTrie_Pfx_Add(char *data, int id, int length, t_TrieNode *node, t_PcTrie *trie_ptr)$/;"	f
+WholeTrie_Pfx_Search	wholetrie.c	/^int WholeTrie_Pfx_Search(char *data, t_TrieNode *node, t_PcTrie *trie_ptr)$/;"	f
+__ftrie_h__	inc/ftrie.h	2;"	d
+__mymath_h__	inc/mymath.h	2;"	d
+__pc_trie_h__	inc/pc_trie.h	2;"	d
+__wholetrie_h__	inc/wholetrie.h	2;"	d
+bitmap	inc/wholetrie.h	/^	char *bitmap;$/;"	m	struct:s_PcTrie
+data	inc/ftrie.h	/^	char *data;$/;"	m	struct:s_PrefixInfo
+id	inc/ftrie.h	/^	int id;$/;"	m	struct:s_PrefixInfo
+id	inc/ftrie.h	/^	int id;$/;"	m	struct:s_TrieNode
+id	inc/pc_trie.h	/^	int id;$/;"	m	struct:s_PcNode
+is_prefix	inc/ftrie.h	/^	int is_prefix;$/;"	m	struct:s_TrieNode
+len	inc/pc_trie.h	/^	int len;\/\/value to indentify if the node is inherited$/;"	m	struct:s_PcNode
+main	wholetrie_test.c	/^int main(void)$/;"	f
+mypow	mymath.c	/^int mypow(int i, int j)$/;"	f
+next	inc/pc_trie.h	/^	struct s_PcSlot *next;$/;"	m	struct:s_PcSlot	typeref:struct:s_PcSlot::s_PcSlot
+pc_node	inc/pc_trie.h	/^	t_PcNode pc_node[4];$/;"	m	struct:s_PcSlot
+pcnode_head	inc/wholetrie.h	/^	t_PcNode *pcnode_head;$/;"	m	struct:s_PcTrie
+s_PcNode	inc/pc_trie.h	/^typedef struct s_PcNode$/;"	s
+s_PcSlot	inc/pc_trie.h	/^typedef struct s_PcSlot$/;"	s
+s_PcTrie	inc/wholetrie.h	/^typedef struct s_PcTrie$/;"	s
+s_PrefixInfo	inc/ftrie.h	/^typedef struct s_PrefixInfo {$/;"	s
+s_TrieNode	inc/ftrie.h	/^typedef struct s_TrieNode {$/;"	s
+slot_head	inc/wholetrie.h	/^	t_PcSlot **slot_head;$/;"	m	struct:s_PcTrie
+str2num	wholetrie.c	/^int  str2num(char *data_13)$/;"	f
+t_PcNode	inc/pc_trie.h	/^} t_PcNode;$/;"	t	typeref:struct:s_PcNode
+t_PcSlot	inc/pc_trie.h	/^} t_PcSlot;$/;"	t	typeref:struct:s_PcSlot
+t_PcTrie	inc/wholetrie.h	/^} t_PcTrie;$/;"	t	typeref:struct:s_PcTrie
+t_PrefixInfo	inc/ftrie.h	/^} t_PrefixInfo;$/;"	t	typeref:struct:s_PrefixInfo
+t_TrieNode	inc/ftrie.h	/^} t_TrieNode;$/;"	t	typeref:struct:s_TrieNode

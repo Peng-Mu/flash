@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
-#include <math.h>
 #include "pc_trie.h"
 
 //typedef struct s_PcNode
@@ -32,6 +31,10 @@ char* Bitmap_Create(int prefix_len)
 	return bitmap;
 }
 
+void Bitmap_Destroy(char *bitmap)
+{
+	free(bitmap);
+}
 
 t_PcNode* PcNode_Create(int num)
 {
@@ -45,6 +48,11 @@ t_PcNode* PcNode_Create(int num)
 		node[i].len = -1;
 	}
 	return node;
+}
+
+void PcNode_Destroy(t_PcNode *node_head)
+{
+	free(node_head);
 }
 
 t_PcSlot** Slot_Create(void)
@@ -89,6 +97,19 @@ void Slot_Delete(t_PcSlot **slot_head, int slot_num)
 	temp = *prev;
 	*prev = temp->next;
 	free(temp);
+}
+
+void Slot_Destroy(t_PcSlot **slot_head)
+{
+	t_PcSlot *temp, *p = *slot_head;
+	
+	while(p != NULL)
+	{
+		temp = p;
+		p = p->next;
+		free(temp);
+	}
+	free(slot_head);
 }
 
 t_PcSlot* Slot_Locate(t_PcSlot **slot_head, int slot_num)
@@ -364,6 +385,11 @@ int PcTrie_Pfx_Search(char *data, char *bitmap, t_PcSlot **slot_head, t_PcNode *
 	t_PcNode *node;
 
 	id = node_head[0].id;
+	if (strlen(data) != 9)
+	{
+		printf("Error, The search data length in pctrie isn't 9!\n");
+		exit(0);
+	}
 	while (data[i] != '\0')
 	{
 		if (data[i] == '0') num = num*2;
