@@ -14,16 +14,16 @@ int main(int argc, const char* argv[])
 	lpresult->match = 0;
 	//sFlashrecord *flash = NULL;
 	int rc = 0;
-	int num, last, id, i;
+	int num, last, id, i,leng;
 	char *search;
-	char *p[] = {
-		"0",
-		"00",
-		"000",
-		"1111111111111",
-		NULL
-	};
-	
+    char p[144]="";
+	FILE *f;
+	f = fopen(argv[1], "r");
+    if(!f) {
+        printf("file open failed\n");
+        return 0;
+    }
+		
 //	int i, j = 1;
 //	for(i = 0; i < 14; i++)
 //	{
@@ -54,27 +54,39 @@ int main(int argc, const char* argv[])
 		goto done;
 	}
 	
-	
-	for( i= 0 ; i < 4; i++)
+	i = 0 ;
+	while(fgets(p, 144, f) != NULL)
 	{
+		leng = strlen(p)-2;
+		if(leng == 0 && p[0] == '*')
+		{
+			continue;
+			i++;
+		}
+		//printf("rules: %s \n",  p );
 		flashrecord->ftable = flashtable;
 		flashrecord->id = i;
-		flashrecord->width = strlen(p[i]);
-		flashrecord->prefix = malloc(sizeof(sizeof(p[i])));
-		memcpy(flashrecord->prefix,p[i],strlen(p[i]));
-		//printf("rules: %s \n",  flashrecord->prefix );
+		flashrecord->width = leng;
+		flashrecord->prefix = malloc(leng+1);
+		memcpy(flashrecord->prefix,p,leng);
+		flashrecord->prefix[leng] = '\0';
+		//printf("rules: %s  \n",  flashrecord->prefix );
+		//printf("length: %d \n", flashrecord->width);
 		rc = FlashTable_Record_Add(flashtable, flashrecord, i);
 		if( rc != 0)
 		{
 			printf("add flashrecord failure");
 			goto done;
 		}
-		
-	}
+		i++;
+		memset(p, 0, leng+1);
+		if(i%10240 == 0)
+			printf("--------%d----------\n", i);
+	 }
 	
-	
-	memset(flashrecord, 0, sizeof(*flashrecord));
-	for( i = 0 ;  i < 4; i++ )
+	num = i;
+	/*memset(flashrecord, 0, sizeof(*flashrecord));
+	for( i = 0 ;  i < num; i++ )
 	{
 		flashrecord = FlashTable_Record_Get(flashtable, i);
 		if(flashrecord == NULL)
@@ -90,10 +102,10 @@ int main(int argc, const char* argv[])
 			goto done;	
 		}
 		printf("match : %d , level: %d \n", lpresult->match,lpresult->level);
-	}
+	}*/
 	
 
-	for( i = 0 ;  i < 4; i++ )
+	/*for( i = 0 ;  i < 4; i++ )
 	{
 		flashrecord = FlashTable_Record_Get(flashtable, i);
 		if(flashrecord == NULL)
@@ -116,14 +128,14 @@ int main(int argc, const char* argv[])
 			goto done;	
 		}
 		printf("match : %d , level: %d \n", lpresult->match,lpresult->level);
-	}
-
+	}*/
+	hash_status();
 	free(lpresult);
 	
 	
 done:
-	if (flashrecord) FlashRecord_Destory(flashrecord);
-	if (flashtable) FlashTable_Destory(flashtable);
+	//if (flashrecord) FlashRecord_Destory(flashrecord);
+	//if (flashtable) FlashTable_Destory(flashtable);
     
 	return rc;
 }

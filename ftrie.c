@@ -13,7 +13,7 @@ FlashError Trie_Create(t_TrieNode** trienode, int prefix_len)
 
 	int i;
 	FlashError rc = 0;
-	int total_num = pow(2, prefix_len+1);
+	int total_num = 2 << prefix_len+1;
 	//printf("total num is %d\n", total_num);
 	t_TrieNode* node = (t_TrieNode*) malloc(total_num*sizeof(t_TrieNode));
 	if (node == NULL) 

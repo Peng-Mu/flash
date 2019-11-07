@@ -4,10 +4,14 @@
 #include "List.h"
 #include "interface.h"
 #include "utils.h"
-
-#define trie_number    2
+#include "hash.h"
+#define trie_number    8
 #define LEVEL_0_LENGTH 13
 #define PCTRIE_LENGTH  9
+
+NHIModuleSet* LpmModuleSet = NULL ;
+NHITableEntry* rootEntryIndex = NULL ;
+
 
 
 FlashError FlashTable_Create( sFlashtable** fTable) {
@@ -95,8 +99,14 @@ FlashError FlashTable_Record_Add(sFlashtable* flashtable, sFlashrecord* flashrec
 	int nhi_index  = 0;
 	char* hash_key = NULL;
 	char* nhi_str  = NULL;
+	char* temp = NULL;
+	pc_Trie *pct;
 	
-
+	int rootId = 999;
+	pc_TrieNode *pcTrieNode = malloc(sizeof(pc_TrieNode));
+	pcTrieNode->lpmRecordId = flashrecord->id;
+	
+	
 	 if (table->depth && table->flashrecordList == NULL)    {
         rc = List_Create(table->depth, sizeof(void*), &table->flashrecordList);
 		//printf("%d\n",rc);
@@ -115,12 +125,13 @@ FlashError FlashTable_Record_Add(sFlashtable* flashtable, sFlashrecord* flashrec
 	record->ftable = table;
 	record->id 	   = flashrecord->id;
 	record->width  = flashrecord->width;
-	record->prefix = (char*)malloc(record->width);
+	record->prefix = (char*)malloc((record->width));
+	
 	if(record->prefix == NULL)
 	{
 		printf("copy record fail");
 	}
-	memcpy(record->prefix, flashrecord->prefix, record->width);
+	memcpy(record->prefix, flashrecord->prefix, (record->width));
 	//printf("rules: %s \n",  record->prefix );
 	if (id == -1) {
         rc = List_Element_Add(table->flashrecordList, (void**)&pListRecord);
@@ -163,7 +174,7 @@ FlashError FlashTable_Record_Add(sFlashtable* flashtable, sFlashrecord* flashrec
 	{
 
 
-		if( trie_number == 2)
+		/*if( trie_number == 2)
 		{
 			nhi_number = 1;
 		}else if( trie_number == 4)
@@ -194,8 +205,45 @@ FlashError FlashTable_Record_Add(sFlashtable* flashtable, sFlashrecord* flashrec
 		{
 			printf("add the recR ord to the pctrie failure");
 			goto done;
-		}
+		}*/
 		
+        int level = (record->width - LEVEL_0_LENGTH) / PCTRIE_LENGTH;
+        int prefixlen;
+        if((record->width - 13) % PCTRIE_LENGTH == 0) {
+            level = level -1;
+        }
+        prefixlen = 13 + level * PCTRIE_LENGTH;
+		pcTrieNode->lenth = flashrecord->width - prefixlen;
+		temp = malloc(pcTrieNode->lenth);
+		memcpy(temp, flashrecord->prefix+prefixlen , pcTrieNode->lenth);
+		//printf("temp: %s \n", temp);
+		route_str_to_binary(temp, pcTrieNode->recordData);
+		hash_key = malloc(prefixlen);
+        memcpy(hash_key, record->prefix ,(prefixlen));
+        if((pct = hash_query(level, hash_key)) == NULL) {
+		
+		 	 if(LpmModuleSet == NULL)
+			 InitLpmModuleSet(&LpmModuleSet);
+			
+			rootId = 999;
+            rc = CreatePcTrie(&pct, LpmModuleSet, rootId, -1, NULL);
+			if(rc != 0) {
+                printf("error create pctrie\n");
+                free(pct);
+                goto done;
+            }
+            rc = hash_add(level, hash_key, pct);
+            if(rc != 0) {
+                printf("add hash failed\n");
+                free(pct);
+                goto done;
+            }
+        } 
+        rc = InsertRecord(pct, pcTrieNode);
+        if(rc != 0) {
+            printf("add hash failed\n");
+            goto done;
+        }
 	}
 	table->recordCount += 1;
 done:
@@ -242,7 +290,7 @@ FlashError FlashTable_Record_Rm(sFlashtable* flashtable, int id )
 	{
 
 
-		if( trie_number == 2)
+		/*if( trie_number == 2)
 		{
 			nhi_number = 1;
 		}else if( trie_number == 4)
@@ -257,8 +305,8 @@ FlashError FlashTable_Record_Rm(sFlashtable* flashtable, int id )
 			rc = 1;
 			goto done;
 		}
-		hash_key=malloc((record->width-nhi_number));
-		memcpy(hash_key, record->prefix, record->width-nhi_number);
+		hash_key=malloc(BYTE_COUNT(record->width-nhi_number));
+		memcpy(hash_key, record->prefix, BYTE_COUNT(record->width-nhi_number));
 
 		for(int i = 0 ; i < nhi_number ; i++)
 		{
@@ -274,7 +322,7 @@ FlashError FlashTable_Record_Rm(sFlashtable* flashtable, int id )
 			printf("delte the record to the pctrie failure");
 			rc = 1;
 			goto done;
-		}
+		}*/
 		
 	}
 	
@@ -323,15 +371,15 @@ FlashError Dp_Lookup(sFlashtable* flashtable, int width, const char* search, sLp
 		printf("in trie search error");
 		goto done;
 	}
-	for(i = hash_index-1 ; i >= 0 ; i--)
+	/*for(i = hash_index-1 ; i >= 0 ; i--)
 	{
 	    offset = LEVEL_0_LENGTH + i*PCTRIE_LENGTH;
-		hash_key = (char *)malloc(offset);
-		memset(hash_key, 0, offset);
-		memcpy(hash_key,search,offset);
-		//printf("search_key: %s", search_key);
-		//*pctrie = hash(hash_key);
-		/*if(pctrie != NULL)
+		hash_key = (char *)malloc(BYTE_COUNT(offset));
+		memset(hash_key, 0, BYTE_COUNT(offset));
+		memcpy(hash_key,search,BYTE_COUNT(offset));
+		printf("search_key: %s", search_key);
+		pctrie = hash(hash_key);
+		if(pctrie != NULL)
 		{
 			search_key = (char *)malloc(BYTE_COUNT(length-offset));
 			memeset(search , 0 , BYTE_COUNT(length-offset));
@@ -345,15 +393,15 @@ FlashError Dp_Lookup(sFlashtable* flashtable, int width, const char* search, sLp
 			if(result != -1)
 				 break;
 				
-		}*/
-	}
+		}
+	}*/
 	if (result != -1)
 	{
 		lpresult->match = 1;
-		lpresult->level = i+2;	}else if ( level_0_result != -1)
+		lpresult->level = i+1;	}else if ( level_0_result != -1)
 	{
 		lpresult->match = 1;
-		lpresult->level = 1;
+		lpresult->level = 0;
 	}else
 	{
 		lpresult->match = 0;

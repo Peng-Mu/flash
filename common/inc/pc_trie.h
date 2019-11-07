@@ -6,19 +6,26 @@
 #define PC_TRIE_BITS 9
 #define COMPRESS_LYAER_NUMBER 3
 #define PC_TOTAL_SIZE 256 * 16 *1024
-#define PC_MOUDLE_SIZE 128
+#define PC_MOUDLE_SIZE 64+1
 #define PC_MOUDLE_COUNT (PC_TOTAL_SIZE/PC_MOUDLE_SIZE)
 
 struct BitMap;
-struct NHIModuleSet;
+struct NHITableSet;
 struct NHITableEntry;
-struct sPairList;
+struct PairList;
+struct PairNode;
 
-typedef struct sPairList {
-	struct sPairList* next;
+typedef struct sPairNode {
+	struct sPairNode *next;
 	int first;
 	int second;
 }PairNode;
+
+typedef struct sPairList {
+	PairNode* startNode;
+	PairNode* endNode;
+	int size;
+}PairList;
 
 typedef struct sNHITableEntry {
 	unsigned char available;
@@ -48,10 +55,8 @@ typedef struct BitMap {
 	NHITableEntry* Index[1 << (PC_TRIE_BITS - COMPRESS_LYAER_NUMBER+1)];
 	int FirstAvailableLocation;
 	int moduleId;
-	PairNode* relationList;
-	PairNode* lastRelationListNode;
-	int relationListSize;
-	PairNode* firstNodeLenthList;
+	PairList relationList;
+	PairList firstNodeLenthList;
 }pc_Trie;
 
 typedef struct sPc_TrieNode {
@@ -61,35 +66,15 @@ typedef struct sPc_TrieNode {
 }pc_TrieNode;
 
 TcError CreatePcTrie(pc_Trie **pcTrie, NHIModuleSet* lpmModuleSet, int rootId, int rootModuleId, NHITableEntry* rootEntryIndex);
-TcError InsertPcTrieNode(pc_Trie *pcTrie, pc_TrieNode *pcTrieNode);
+TcError InsertRecord(pc_Trie *pcTrie, pc_TrieNode *pcTrieNode);
+TcError DeleteRecord(pc_Trie *pcTrie, int lpmId);
+TcError SearchRecord(pc_Trie *pcTrie, int lenth, void *key, int* id);
 TcError AllocatNHITable(NHIModuleSet* lpmModuleSet, NHITableEntry **NHITableIndex, int *moduleId);
 TcError GetNHITableLocation(pc_Trie *pcTrie, NHITableEntry **NHITableIndex);
 TcError DeletePcTrieNode(pc_Trie *pcTrie, int index);
-TcError UpdatePcTrieChildNode(pc_Trie *pcTrie, int index);
+TcError UpdatePcTrieChildNode(pc_Trie* pcTrie, int index, int now, int src, int location);
 void RecoveryData(pc_Trie *pcTrie, int index, int **recordId);
 int IsChildFull(pc_Trie *pcTrie, int index);
 TcError InitLpmModuleSet(NHIModuleSet** lpmModuleSet);
-int IsPairListEmpty(PairNode* pairList) {
-	if (pairList->next) { return 0; }
-	else { return 1; }
-}
-TcError addPairListNode(PairNode** lastRelationListNode, int first, int second) {
-	PairNode* newNode = malloc(sizeof(PairNode));
-	newNode->next = NULL;
-	newNode->first = first;
-	newNode->second = second;
-	(*lastRelationListNode)->next = newNode;
-	*lastRelationListNode = newNode;
-	return TcE_OK;
-}
-PairNode* findSecondOfPairList(PairNode* pairList, int first) {
-	PairNode* pairListNode = pairList->next;
-	while (pairListNode) {
-		if (pairListNode->first == first) {
-			return pairListNode;
-		}
-		pairListNode = pairListNode->next;
-	}
-	return NULL;
-}
+
 #endif

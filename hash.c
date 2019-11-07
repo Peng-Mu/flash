@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "hash.h"
+#include "utils.h"
+
 
 #define trie_number    8
 #define LEVEL_0_LENGTH 13
@@ -84,7 +86,7 @@ struct pc_Trie *hash_query(int level, char *hashkey)
 	str2binary(hashkey, strlen(hashkey));
 	hashval = hash1(hashkey,strlen(hashkey));
 	hashNode* node =  hashtable[level][hashval];
-	while(node != NULL])
+	while(node != NULL)
 	{
 			if (strcmp(node->hashkey, hashkey) == 0)
 				return node->pctrie;
@@ -99,21 +101,29 @@ struct pc_Trie *hash_query(int level, char *hashkey)
 
 void str2binary(char* str, int width)
 {
-    int i, j;
-    for (i=0; i<width/8; i++)
-    {
-        char byte = 0;
-        for (j=0; j<8; j++)
-        {
-            int idx = 8*i + j;
-            char value = (idx < width) 
-                            ? str[idx] - '0' 
-                            : 0;
-            byte = byte<<1 | value;
+  int i,n;
+  char* temp = malloc(BYTE_COUNT(width));
+  memset(temp, 0, BYTE_COUNT(width));
+  for(i = 0; i < width; i++) {
+  		n = i/8;
+        if(str[i] == '1') {
+            temp[n] |= (1 << (i%8));
         }
-        str[i] = byte;
     }
-    str[i] = '\0';
+  temp[n+1]='\0';
+  memset(str, 0, width);
+  memcpy(str,temp,strlen(temp));
+}
+void route_str_to_binary(char *route, char *arr)
+{
+    int i;
+    memset(arr, 0, (strlen(route)+7)/8);
+    for(i = 0; i < strlen(route); i++) {
+        if(route[i] == '1') {
+            arr[i/8] |= (1 << (i%8));
+        }
+    }
+    
 }
 
 
@@ -122,6 +132,7 @@ int hash_add(int level, char *hashkey,  pc_Trie *pctrie)
 	int hashval = 0 ;
 	int rc = 0;
 	int length = strlen(hashkey);
+	char* hashkey1 = malloc(strlen(hashkey));
 	if(hashtable[level] == NULL)
 	{
 		hashtable[level] = (hashNode**) malloc(hash_table_size*sizeof(void*));
@@ -132,8 +143,8 @@ int hash_add(int level, char *hashkey,  pc_Trie *pctrie)
 		}
 		memset(hashtable[level],0,sizeof(hashtable[level]));	
 	}
-	str2binary(hashkey, length);
-	hashval=hash1(hashkey,length);
+	route_str_to_binary(hashkey, hashkey1);
+	hashval=hash1(hashkey1,length);
 	rc = hash_list_add(&hashtable[level][hashval],hash_create(hashkey,pctrie));
 
 done:
@@ -141,7 +152,7 @@ done:
 }
 
 
-int hash_destroy()
+void hash_destroy()
 {
 
 	hashNode* prev = NULL, *p= NULL;
@@ -184,9 +195,9 @@ void hash_status()
 			h += 1;
 		}
 		BITMAP_SIZE = 1 << (PCTRIE_LENGTH - h +1);
-		struct hashElement *he;
+		hashNode *he;
 		printf("-----------------------------------------------------------------\n");
-		printf("stride=%d comp_size=%d\n", PCTRIE_LENGTH ,trie_number,);
+		printf("stride=%d comp_size=%d\n", PCTRIE_LENGTH ,trie_number);
 		printf("level pctrie record hashval nhiNum nhiTabSize\n");
 		for(i = 0; i < 16; i++) {
 			count = 0;
@@ -194,9 +205,9 @@ void hash_status()
 			nhi_cnt = 0;
 			nhi_table_size = 0;
 			record_cnt = 0;
-			if(membership[i] != NULL) {
+			if(hashtable[i] != NULL) {
 				for(j = 0; j < 16*1024; j++) {
-					if((he = membership[i][j]) == NULL) { continue; }
+					if((he = hashtable[i][j]) == NULL) { continue; }
 					hashval_cnt++;
 					while(he) {
 						count++;
